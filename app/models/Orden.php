@@ -2,7 +2,7 @@
 
 require_once './db/AccesoDatos.php';
 require_once './models/Empleado.php';
-require_once './models/Table.php';
+require_once './models/Mesa.php';
 
 class Orden{
 
