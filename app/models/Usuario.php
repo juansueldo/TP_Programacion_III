@@ -9,35 +9,39 @@ class Usuario{
     //--- Attributes ---//
     public $id;
     public $usuario_nombre;
-    public $password;
+    public $clave;
     public $esAdmin;
     public $usuario_tipo;
     public $estado;
     public $fecha_inicio;
     public $fecha_fin;
 
+    public function __construct(){}
 
-    public function __construct($usuario_nombre, $password, $esAdmin, $usuario_tipo, $estado, $fecha_inicio){
-        $this->usuario_nombre = $usuario_nombre;
-        $this->password = $password;
-        $this->esAdmin = $esAdmin;
-        $this->usuario_tipo = $usuario_tipo;
-        $this->estado = $estado;
-        $this->fecha_inicio = $fecha_inicio;
+   
+    public static function crearUsuario($usuario_nombre, $clave, $esAdmin, $usuario_tipo, $estado, $fecha_inicio){
+        $usuario = new Usuario();
+        $usuario->usuario_nombre = $usuario_nombre;
+        $usuario->clave = $clave;
+        $usuario->esAdmin = $esAdmin;
+        $usuario->usuario_tipo = $usuario_tipo;
+        $usuario->estado = $estado;
+        $usuario->fecha_inicio = $fecha_inicio;
+
+        return $usuario;
     }
 
 
     public static function insertartUsuario($usuario){
         $objDataAccess = AccesoDatos::obtenerInstancia();
-        $query = $objDataAccess->prepararConsulta("INSERT INTO usuarios (usuario_nombre, password, esAdmin, usuario_tipo, estado, fecha_inicio) 
-        VALUES (:usuario_nombre, :password, :esAdmin, :usuario_tipo, :estado, :fecha_inicio)");
-        $passwordHash = password_hash($usuario->password, PASSWORD_DEFAULT);
-        $query->bindValue(':usuario_nombre', $usuario->usuario_nombre, PDO::PARAM_STR);
-        $query->bindValue(':password', $passwordHash);
-        $query->bindValue(':esAdmin', $usuario->esAdmin, PDO::PARAM_INT);
-        $query->bindValue(':usuario_tipo', $usuario->usuario_tipo, PDO::PARAM_STR);
-        $query->bindValue(':estado', $usuario->estado, PDO::PARAM_STR);
-        $query->bindValue(':fecha_inicio', $usuario->fecha_inicio, PDO::PARAM_STR);
+        $query = $objDataAccess->prepararConsulta("INSERT INTO usuarios (usuario_nombre, clave, esAdmin, usuario_tipo, estado, fecha_inicio) 
+        VALUES (:usuario_nombre, :clave, :esAdmin, :usuario_tipo, :estado, :fecha_inicio)");
+        $query->bindValue(':usuario_nombre', $usuario->usuario_nombre);
+        $query->bindValue(':clave', $usuario->clave);
+        $query->bindValue(':esAdmin', $usuario->esAdmin);
+        $query->bindValue(':usuario_tipo', $usuario->usuario_tipo);
+        $query->bindValue(':estado', $usuario->estado);
+        $query->bindValue(':fecha_inicio', $usuario->fecha_inicio);
         $query->execute();
 
         return $objDataAccess->obtenerUltimoId();
@@ -82,10 +86,10 @@ class Usuario{
     public static function modificarUsuario($usuario){
 
         $objDataAccess = AccesoDatos::obtenerInstancia();
-        $query = $objDataAccess->prepararConsulta("UPDATE usuarios SET usuario_nombre = :usuario_nombre, password = :password WHERE id = :id");
+        $query = $objDataAccess->prepararConsulta("UPDATE usuarios SET usuario_nombre = :usuario_nombre, clave = :clave WHERE id = :id");
         try {
             $query->bindValue(':usuario_nombre', $usuario->usuario_nombre, PDO::PARAM_STR);
-            $query->bindValue(':password', $usuario->password, PDO::PARAM_STR);
+            $query->bindValue(':clave', $usuario->clave, PDO::PARAM_STR);
             $query->bindValue(':id', $usuario->id, PDO::PARAM_INT);
             $query->execute();
         } catch (Error $error) {

@@ -13,17 +13,20 @@ require_once './db/AccesoDatos.php';
     public $fecha_inicio;
     public $fecha_fin;
 
-    public function __construct($usuario_id, $empleado_area_id, $nombre, $fecha_inicio){
-        $this->usuario_id = $usuario_id;
-        $this->empleado_area_id = $empleado_area_id;
-        $this->nombre = $nombre;
-        $this->fecha_inicio = $fecha_inicio;
+    public function __construct(){}
+    public static function crearEmpleado($usuario_id, $empleado_area_id, $nombre, $fecha_inicio){
+        $empleado = new Empleado();
+        $empleado->usuario_id = $usuario_id;
+        $empleado->empleado_area_id = $empleado_area_id;
+        $empleado->nombre = $nombre;
+        $empleado->fecha_inicio = $fecha_inicio;
+        
+        return $empleado;
     }
-
     
     public static function insertarEmpleado($empleado){
         $objDataAccess = AccesoDatos::obtenerInstancia();
-        $query = $objDataAccess->prepararConsulta("INSERT INTO `empleados` (`usuario_id`, `empleado_area_id`, `nombre`, `fecha_inicio`)
+        $query = $objDataAccess->prepararConsulta("INSERT INTO empleados (usuario_id, empleado_area_id, nombre, fecha_inicio)
         VALUES (:usario_id, :empleado_area_id, :nombre, :fecha_inicio);");
         $query->bindValue(':usario_id', $empleado->usuario_id);
         $query->bindValue(':empleado_area_id', $empleado->empleado_area_id);

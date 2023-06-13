@@ -15,6 +15,7 @@ require_once './db/AccesoDatos.php';
 require_once './middlewares/AutentificadorJWT.php';
 
 require_once './controllers/UsuarioController.php';
+require_once './controllers/MesaController.php';
 
 // Load ENV
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
@@ -27,6 +28,11 @@ $app = AppFactory::create();
 $app->addErrorMiddleware(true, true, true);
 
 
+$app->get('[/]', function (Request $request, Response $response) {    
+  $payload = json_encode(array('method' => 'GET', 'msg' => "Inicio TP labo III"));
+  $response->getBody()->write($payload);
+  return $response->withHeader('Content-Type', 'application/json');
+});
 // Routes
 $app->group('/usuarios', function (RouteCollectorProxy $group) {
   $group->get('[/]', \UsuarioController::class . ':TraerTodos');
@@ -35,12 +41,17 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
 });
 
 
-  $app->group('/usuarios', function (RouteCollectorProxy $group) {
-    $group->get('[/]', \UsuarioController::class . ':TraerTodos'); 
-    //$group->get('/{id}', \UserController::class . ':TraerUno');
-    $group->post('[/]', \UsuarioController::class . ':CargarUno'); 
-    //$group->put('/', \UserController::class . ':ModificarUno');
-    $group->delete('/{id}', \UsuarioController::class . ':BorrarUno');
-  })->add(\MWAccess::class . ':isAdmin');
-  
+
+$app->group('/mesas', function (RouteCollectorProxy $group) {
+  $group->get('[/]', \MesaController::class . ':TraerTodos');
+  $group->get('/{mesa}', \MesaController::class . ':TraerUno');
+  $group->post('[/]', \MesaController::class . ':CargarUno');
+});
+
+$app->group('/empleados', function (RouteCollectorProxy $group) {
+  $group->get('[/]', \EmpleadoController::class . ':TraerTodos');
+  $group->get('/{empleado}', \EmpleadoController::class . ':TraerUno');
+  $group->post('[/]', \EmpleadoController::class . ':CargarUno');
+});
+
 $app->run();
