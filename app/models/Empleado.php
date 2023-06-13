@@ -14,6 +14,7 @@ require_once './db/AccesoDatos.php';
     public $fecha_fin;
 
     public function __construct(){}
+    
     public static function crearEmpleado($usuario_id, $empleado_area_id, $nombre, $fecha_inicio){
         $empleado = new Empleado();
         $empleado->usuario_id = $usuario_id;

@@ -108,5 +108,16 @@ class Usuario{
 
         return $query;
     }
+    public static function insertartHistorialLogin($usuario){
+        $objDataAccess = AccesoDatos::obtenerInstancia();
+        $query = $objDataAccess->prepararConsulta("INSERT INTO historial_login (usuario_id, usuario_nombre, fecha_login) 
+        VALUES (:usuario_id, :usuario_nombre, :fecha_login)");
+        $query->bindValue(':usuario_id', $usuario->id, PDO::PARAM_INT);
+        $query->bindValue(':usuario_nombre', $usuario->nombre_usuario, PDO::PARAM_STR);
+        $query->bindValue(':fecha_login', date("Y-m-d H:i:s"), PDO::PARAM_STR);
+        $query->execute();
+
+        return $objDataAccess->obtenerUltimoId();
+    }
 }
 ?>
