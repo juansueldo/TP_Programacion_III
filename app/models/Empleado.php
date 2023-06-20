@@ -1,36 +1,43 @@
 <?php
 
 
-require_once './models/Orden.php';
+require_once './models/Pedido.php';
 require_once './db/AccesoDatos.php';
 
  class Empleado{
 
     public $id;
     public $usuario_id;
-    public $empleado_area_id;
+    public $area_id;
     public $nombre;
     public $fecha_inicio;
     public $fecha_fin;
 
     public function __construct(){}
     
-    public static function crearEmpleado($usuario_id, $empleado_area_id, $nombre, $fecha_inicio){
+    public static function crearEmpleado($usuario_id, $area_id, $nombre, $fecha_inicio){
         $empleado = new Empleado();
         $empleado->usuario_id = $usuario_id;
-        $empleado->empleado_area_id = $empleado_area_id;
+        $empleado->area_id = $area_id;
         $empleado->nombre = $nombre;
         $empleado->fecha_inicio = $fecha_inicio;
         
         return $empleado;
     }
+
+    public static function MostrarDatos($empleado){
+        echo "Usuario ID: " . $empleado->usuario_id . "<br>";
+        echo "Área ID: " . $empleado->area_id . "<br>";
+        echo "Nombre: " . $empleado->nombre . "<br>";
+        echo "Fecha de inicio: " . $empleado->fecha_inicio . "<br>";
+    }
     
     public static function insertarEmpleado($empleado){
         $objDataAccess = AccesoDatos::obtenerInstancia();
-        $query = $objDataAccess->prepararConsulta("INSERT INTO empleados (usuario_id, empleado_area_id, nombre, fecha_inicio)
-        VALUES (:usario_id, :empleado_area_id, :nombre, :fecha_inicio);");
+        $query = $objDataAccess->prepararConsulta("INSERT INTO empleados (usuario_id, area_id, nombre, fecha_inicio)
+        VALUES (:usario_id, :area_id, :nombre, :fecha_inicio);");
         $query->bindValue(':usario_id', $empleado->usuario_id);
-        $query->bindValue(':empleado_area_id', $empleado->empleado_area_id);
+        $query->bindValue(':area_id', $empleado->area_id);
         $query->bindValue(':nombre', $empleado->nombre);
         $query->bindValue(':fecha_inicio', $empleado->fecha_inicio);
         try {
@@ -73,9 +80,9 @@ require_once './db/AccesoDatos.php';
 
     public static function actualizarEmpleado($empleado){
         $objDataAccess = AccesoDatos::obtenerInstancia();
-        $query = $objDataAccess->prepararConsulta("UPDATE `empleados` SET usuario_id = :usuario_id, empleado_area_id = :empleado_area_id, nombre = :nombre WHERE id = :id");
+        $query = $objDataAccess->prepararConsulta("UPDATE `empleados` SET usuario_id = :usuario_id, area_id = :area_id, nombre = :nombre WHERE id = :id");
         $query->bindValue(':usario_id', $empleado->usuario_id);
-        $query->bindValue(':empleado_area_id', $empleado->empleado_area_id);
+        $query->bindValue(':area_id', $empleado->area_id);
         $query->bindValue(':nombre', $empleado->nombre);
         $query->bindValue(':id', $empleado->id);
         $query->execute();
@@ -84,4 +91,3 @@ require_once './db/AccesoDatos.php';
     }
 
  }
-?>

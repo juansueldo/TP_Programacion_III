@@ -4,78 +4,113 @@ require_once './interfaces/IApiUsable.php';
 
 class UsuarioController extends Usuario implements IApiUsable
 {
-  public function CargarUno($request, $response, $args){
+  public function CargarUno($request, $response, $args)
+  {
 
     $params = $request->getParsedBody();
-    echo '<br>Datos del Usuario a crear:<br>';
-    var_dump($params);
+    echo 'Datos del Usuario a crear: '. `\n`;
+    Usuario::MostrarDatos($params);
+
     
-    // Creamos el User
-    $user = Usuario::crearUsuario(
-      $params['usuario_nombre'], 
-      $params['clave'], 
-      $params['esAdmin'], 
+    $usuario = Usuario::crearUsuario(
+      $params['usuario_nombre'],
+      $params['clave'],
+      $params['esSocio'],
       $params['usuario_tipo'],
-      $params['estado'], 
-      $params['fecha_inicio']);
-    if (Usuario::insertartUsuario($user) > 0) {
-        $payload = json_encode(array("mensaje" => "User creado con exito"));
-    }else{
-        $payload = json_encode(array("mensaje" => "Error al crear el User"));
+      $params['estado'],
+      $params['fecha_inicio']
+    );
+    if (Usuario::insertartUsuario($usuario) > 0) {
+      $payload = json_encode(array("mensaje" => "Usuario creado con éxito"));
+    } else {
+      $payload = json_encode(array("mensaje" => "Error al crear el usuario"));
     }
 
     $response->getBody()->write($payload);
     return $response
       ->withHeader('Content-Type', 'application/json');
-}
+  }
 
-    public function TraerUno($request, $response, $args)
-    {
-        // Buscamos usuario por nombre
-        $id = $args['id'];
-        $usuario = Usuario::getUsuarioPorId($id);
-        $payload = json_encode($usuario);
-
-        $response->getBody()->write($payload);
-        return $response
-          ->withHeader('Content-Type', 'application/json');
-    }
-
-    public function TraerTodos($request, $response, $args)
-    {
-        $lista = Usuario::getTodosUsuarios();
-        $payload = json_encode(array("listaUsuario" => $lista));
-
-        $response->getBody()->write($payload);
-        return $response
-          ->withHeader('Content-Type', 'application/json');
-    }
+  public function TraerUno($request, $response, $args)
+  {
     
-    public function ModificarUno($request, $response, $args)
-    {
-        $parametros = $request->getParsedBody();
+    $id = $args['id'];
+    $usuario = Usuario::getUsuarioPorId($id);
+    $payload = json_encode($usuario);
 
-        $nombre = $parametros['nombre'];
-        Usuario::modificarUsuario($nombre);
+    $response->getBody()->write($payload);
+    return $response
+      ->withHeader('Content-Type', 'application/json');
+  }
 
-        $payload = json_encode(array("mensaje" => "Usuario modificado con exito"));
+  public function TraerTodos($request, $response, $args)
+  {
+    $lista = Usuario::getTodosUsuarios();
+    $payload = json_encode(array("listaUsuario" => $lista));
 
-        $response->getBody()->write($payload);
-        return $response
-          ->withHeader('Content-Type', 'application/json');
+    $response->getBody()->write($payload);
+    return $response
+      ->withHeader('Content-Type', 'application/json');
+  }
+
+  public function ModificarUno($request, $response, $args)
+  {
+    $parametros = $request->getParsedBody();
+
+    $nombre = $parametros['nombre'];
+    Usuario::modificarUsuario($nombre);
+
+    $payload = json_encode(array("mensaje" => "Usuario modificado con éxito"));
+
+    $response->getBody()->write($payload);
+    return $response
+      ->withHeader('Content-Type', 'application/json');
+  }
+
+  public function BorrarUno($request, $response, $args)
+  {
+    $params = $request->getParsedBody();
+
+    $usuarioId = $params['id'];
+    Usuario::borrarUsuario($usuarioId);
+
+    $payload = json_encode(array("mensaje" => "Usuario borrado con éxito"));
+
+    $response->getBody()->write($payload);
+    return $response
+      ->withHeader('Content-Type', 'application/json');
+  }
+  public function Login($request, $response, $args)
+  {
+
+    $params = $request->getParsedBody();
+
+    if (isset($params['usuario_nombre']) && isset($params['clave'])) {
+      $usuario_nombre = $params['usuario_nombre'];
+      $clave = $params['clave'];
+      $usuario_actual = Usuario::getUsuarioPorNombre($usuario_nombre);
+
+      if ($usuario_actual != null && ($usuario_actual->usuario_nombre == $usuario_nombre && $usuario_actual->clave == $clave)) {
+        $token = AutentificadorJWT::CrearToken($usuario_actual);
+        $respuesta = $token;
+        $payload = json_encode($respuesta);
+      } else {
+        $payload = json_encode(array("mensaje" => "Login fallido"));
+      }
     }
 
-    public function BorrarUno($request, $response, $args)
-    {
-        $parametros = $request->getParsedBody();
+    $response->getBody()->write($payload);
+    return $response
+      ->withHeader('Content-Type', 'application/json');
+  }
 
-        $usuarioId = $parametros['usuarioId'];
-        Usuario::borrarUsuario($usuarioId);
 
-        $payload = json_encode(array("mensaje" => "Usuario borrado con exito"));
+  public static function GetInfoByToken($request)
+  {
+    $header = $request->getHeader('Authorization');
+    $token = trim(str_replace("Bearer", "", $header[0]));
+    $usuario = AutentificadorJWT::ObtenerData($token);
 
-        $response->getBody()->write($payload);
-        return $response
-          ->withHeader('Content-Type', 'application/json');
-    }
+    return $usuario;
+  }
 }

@@ -8,15 +8,16 @@ class EmpleadoController extends Empleado implements IApiUsable
 
     $params = $request->getParsedBody();
     echo '<br>Datos de la Empleado a crear:<br>';
-    var_dump($params);
+    
     
     $empleado = Empleado::crearEmpleado(
       $params['usuario_id'], 
-      $params['empleado_area_id'], 
+      $params['area_id'], 
       $params['nombre'], 
-      $params['fecha_inicio']
+      date("Y-m-d H:i:s")
     );
-    if (Mesa::insertarMesa($empleado) > 0) {
+    Empleado::MostrarDatos($empleado);
+    if (Empleado::insertarEmpleado($empleado) > 0) {
         $payload = json_encode(array("mensaje" => "Empleado creado con exito"));
     }else{
         $payload = json_encode(array("mensaje" => "Error al crear el Empleado"));
@@ -29,7 +30,6 @@ class EmpleadoController extends Empleado implements IApiUsable
 
     public function TraerUno($request, $response, $args)
     {
-        // Buscamos usuario por nombre
         $id = $args['id'];
         $empleado = Empleado::getEmpleadoPorId($id);
         $payload = json_encode($empleado);
@@ -67,7 +67,7 @@ class EmpleadoController extends Empleado implements IApiUsable
     {
         $parametros = $request->getParsedBody();
 
-        $usuarioId = $parametros['usuarioId'];
+        $usuarioId = $parametros['id'];
         Usuario::borrarUsuario($usuarioId);
 
         $payload = json_encode(array("mensaje" => "Usuario borrado con exito"));

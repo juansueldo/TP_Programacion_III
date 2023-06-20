@@ -54,7 +54,34 @@
 
             return $objDataAccess->obtenerUltimoId();
         }
+        public static function actualizarMesa($mesa){
+            $objDataAccess = AccesoDatos::obtenerInstancia();
+            $query = $objDataAccess->prepararConsulta('UPDATE mesas SET empleado_id = :empleado_id, estado = :estado WHERE id = :id');
+            $query->bindValue(':empleado_id', $mesa->empleado_id, PDO::PARAM_INT);
+            $query->bindValue(':estado', $mesa->estado, PDO::PARAM_STR);
+            $query->bindValue(':id', $mesa->id, PDO::PARAM_INT);
+            $query->execute();
 
+            return  $query->rowCount() > 0;
+        }
+        public static function borrarMesa($mesa){
+            $objDataAccess = AccesoDatos::obtenerInstancia();
+            $query = $objDataAccess->prepararConsulta('DELETE FROM mesas WHERE id = :id');
+            $query->bindValue(':id', $mesa->id);
+            $query->execute();
+
+            return $query->rowCount() > 0;
+        }
+        public static function getMesaPorPedidoId($order_id){
+            $objDataAccess = AccesoDatos::obtenerInstancia();
+            $query = $objDataAccess->prepararConsulta(
+                'SELECT * FROM mesas
+                WHERE id = (SELECT id FROM pedidos WHERE id = :id)');
+            $query->bindParam(':id', $order_id);
+            $query->execute();
+        
+            return $query->fetchObject('Mesa');
+        }
         
  }
 ?>

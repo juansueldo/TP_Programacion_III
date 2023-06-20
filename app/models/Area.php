@@ -4,6 +4,12 @@ require_once './db/AccesoDatos.php';
     class Area {
         public $area_id;
         public $area_descripcion;
+        public static $AREA_PUESTOS = array(
+            'Mozo' => 2,
+            'Cocinero' => 5,
+            'Bartender' => 4,
+            'Cervecero' => 3,
+        );
 
         public function __construct(){}
 
@@ -16,7 +22,9 @@ require_once './db/AccesoDatos.php';
 
             return $objDataAccess->obtenerUltimoId();
         }
-
+        public Static function getAreaPorPuesto($job){
+            return intval(self::$AREA_PUESTOS[$job]);
+        }
         public static function actualizarArea($area){
             $objDataAccess = AccesoDatos::obtenerInstancia();
             $sql = "UPDATE area SET area_descripcion = ':area_descripcion' WHERE area_id = :area_id;";
@@ -49,7 +57,7 @@ require_once './db/AccesoDatos.php';
       
         public static function getTodasAreas(){
             $objDataAccess = AccesoDatos::obtenerInstancia();
-            $sql = "SELECT * FROM areas;";
+            $sql = "SELECT * FROM area;";
             $query = $objDataAccess->prepararConsulta($sql);
             $query->execute();
             $areas = $query->fetchAll(PDO::FETCH_CLASS, 'Areas');
@@ -64,6 +72,15 @@ require_once './db/AccesoDatos.php';
             $query->execute();
             $areas = $query->fetchAll(PDO::FETCH_CLASS, 'Area');
             return $areas;
+        } 
+        public static function getAreaIdPorDescripcion($area_descripcion){
+            $objDataAccess = AccesoDatos::obtenerInstancia();
+            $sql = "SELECT * FROM area WHERE area_descripcion = ':area_descripcion';";
+            $query = $objDataAccess->prepararConsulta($sql);
+            $query->bindParam(':area_descripcion', $area_descripcion);
+            $query->execute();
+            $area = $query->fetchAll(PDO::FETCH_CLASS, 'Area');
+            return $area->area_id;
         } 
  }
 ?>

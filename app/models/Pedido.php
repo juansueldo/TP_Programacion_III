@@ -26,12 +26,12 @@ class Pedido{
         return $pedido;
         
     }
-    public static function insertarOrden($pedido){
+    public static function insertarPedido($pedido){
         $objDataAccess = AccesoDatos::obtenerInstancia();
         $query = $objDataAccess->prepararConsulta('INSERT INTO pedidos (mesa_id, pedido_estado, cliente_nombre, pedido_foto, pedido_costo) 
         VALUES (:mesa_id, :pedido_estado, :cliente_nombre, :pedido_costo)');
         $query->bindValue(':mesa_id', $pedido->mesa_id);
-        $query->bindValue(':orden_estado', $pedido->pedido_estado);
+        $query->bindValue(':pedido_estado', $pedido->pedido_estado);
         $query->bindValue(':cliente_nombre', $pedido->cliente_nombre);
         $query->bindValue(':pedido_foto', $pedido->pedido_foto);
         $query->bindValue(':pedido_costo', $pedido->pedido_costo);
@@ -50,7 +50,7 @@ class Pedido{
     }
 
 
-    public static function getOrdenPorId($id){
+    public static function getPedidoPorId($id){
         $objDataAccess = AccesoDatos::obtenerInstancia();
         $query = $objDataAccess->prepararConsulta('SELECT * FROM pedidos WHERE id = :id');
         $query->bindParam(':id', $id);
@@ -60,7 +60,7 @@ class Pedido{
     }
 
 
-    public static function getOrdernesPorMesa($mesa){
+    public static function getPedidoPorMesa($mesa){
         $objDataAccess = AccesoDatos::obtenerInstancia();
         $query = $objDataAccess->prepararConsulta('SELECT * FROM pedidos WHERE mesa_id = :mesa_id');
         $query->bindParam(':mesa_id', $mesa);
@@ -69,7 +69,7 @@ class Pedido{
         return $query->fetchAll(PDO::FETCH_ASSOC, 'Pedido');
     }
 
-    public static function getOrdenPorEmpleado($empleado){
+    public static function getPedidoPorEmpleado($empleado){
         $objDataAccess = AccesoDatos::obtenerInstancia();
         $query = $objDataAccess->prepararConsulta('SELECT p.id, p.mesa_id, p.pedido_estado 
         FROM pedidos AS p
@@ -81,7 +81,7 @@ class Pedido{
         return $query->fetchAll(PDO::FETCH_ASSOC, 'Pedido');
     }
 
-    public static function getOrdernPorTipoUsuario($tipo){
+    public static function getPedidoPorTipoUsuario($tipo){
         $objDataAccess = AccesoDatos::obtenerInstancia();
         $query = $objDataAccess->prepararConsulta('SELECT p.id, p.mesa_id, p.pedido_estado 
         FROM pedidos AS p
@@ -96,7 +96,7 @@ class Pedido{
     }
 
 
-    public static function actualizarOrden($pedido){
+    public static function actualizarPedido($pedido){
         $objDataAccess = AccesoDatos::obtenerInstancia();
         $query = $objDataAccess->prepararConsulta('UPDATE pedidos 
         SET pedido_estado = :pedido_estado, pedido_costo = :pedido_costo 
@@ -110,7 +110,7 @@ class Pedido{
     }
 
 
-    public static function borrarOrdenPorId($id){
+    public static function borrarPedidoPorId($id){
         $objDataAccess = AccesoDatos::obtenerInstancia();
         $query = $objDataAccess->prepararConsulta('DELETE FROM pedidos WHERE id = :id');
         $query->bindParam(':id', $id);
@@ -118,17 +118,35 @@ class Pedido{
         
         return $query;
     }
-
-  
-    public static function getPorMesaId($mesa_id){
+    public static function getPedidosConTiempo(){
         $objDataAccess = AccesoDatos::obtenerInstancia();
-        $query = $objDataAccess->prepararConsulta('SELECT * FROM pedidos WHERE mesa_id = :mesa_id');
-        $query->bindParam(':mesa_id', $mesa_id);
+        $query = $objDataAccess->prepararConsulta(
+            'SELECT 
+            p.id,
+            p.mesa_id,
+            p.pedido_estado,
+            p.cliente_nombre,
+            p.pedido_foto,
+            p.pedido_costo,
+            MAX(pr.tiempo_para_finalizar) AS tiempo_espera
+            FROM producto AS pr
+            LEFT JOIN pedidos as p
+            ON pr.pedido_asociado = p.id
+            GROUP BY p.id
+            order by tiempo_espera DESC;');
         $query->execute();
 
-        return $query->fetchObject('Pedido');
+        return $query->fetchAll(PDO::FETCH_CLASS, "stdClass");
     }
 
-    
+    public static function actualizarFoto($pedido){
+        $objDataAccess = AccesoDatos::obtenerInstancia();
+        $query = $objDataAccess->prepararConsulta('UPDATE pedidos SET pedido_foto = :pedido_foto WHERE id = :id');
+        $query->bindValue(':id', $pedido->getId());
+        $query->bindValue(':pedido_foto', $pedido->getOrderPicture());
+        $query->execute();
+
+        return $query->rowCount() > 0;
+    }
 }
 ?>

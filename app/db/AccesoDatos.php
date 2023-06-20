@@ -37,4 +37,23 @@ class AccesoDatos
     {
         trigger_error('ERROR: La clonación de este objeto no está permitida', E_USER_ERROR);
     }
+    public static function ObtenerConsulta($sql, $clase=null)
+    {
+        try
+        {   
+            $conexion = AccesoDatos::obtenerInstancia();
+            $consulta = $conexion->prepararConsulta($sql);
+            //var_dump($consulta);
+            $consulta->execute();
+            $retorno = $consulta->fetchAll(PDO::FETCH_CLASS, $clase);
+        }
+        catch(Throwable $mensaje)
+        {
+            printf("Error de la BD: <br> $mensaje .<br>");
+        }
+        finally
+        {
+            return $retorno;
+        }    
+    }
 }
