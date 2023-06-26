@@ -94,6 +94,11 @@ class UsuarioController extends Usuario implements IApiUsable
         $token = AutentificadorJWT::CrearToken($usuario_actual);
         $respuesta = $token;
         $payload = json_encode($respuesta);
+        $idLogin = Usuario::insertartHistorialLogin($usuario_actual);
+
+                if($idLogin > 0){
+                    echo "Login guardado en el historial";
+                }
       } else {
         $payload = json_encode(array("mensaje" => "Login fallido"));
       }

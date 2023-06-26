@@ -82,6 +82,49 @@
         
             return $query->fetchObject('Mesa');
         }
+        public static function getProductosListosParaServir($id, $estado){
+            $objDataAccess = AccesoDatos::obtenerInstancia();
+            $query = $objDataAccess->prepararConsulta('SELECT COUNT(*) as count
+                FROM mesas m
+                JOIN pedidos pe ON m.id = pe.mesa_id
+                JOIN producto p ON pe.nro_pedido = p.pedido_asociado
+                WHERE m.id = :id AND p.estado = :estado');
+            $query->bindParam(':id', $id);
+            $query->bindParam(':estado', $estado);
+            $query->execute();
+
+            $resultado = $query->fetch(PDO::FETCH_ASSOC);
+
+            return $resultado['count'];
+        }
+        public static function getProductosMesa($id){
+            $objDataAccess = AccesoDatos::obtenerInstancia();
+            $query = $objDataAccess->prepararConsulta('SELECT COUNT(*) as count
+                FROM mesas m
+                JOIN pedidos pe ON m.id = pe.mesa_id
+                JOIN producto p ON pe.nro_pedido = p.pedido_asociado
+                WHERE m.id = :id');
+            $query->bindParam(':id', $id);
+            $query->execute();
+
+            $resultado = $query->fetch(PDO::FETCH_ASSOC);
+
+            return $resultado['count'];
+        }
+        public static function getMesaMasUsada(){
+            $objDataAccess = AccesoDatos::obtenerInstancia();
+            $query = $objDataAccess->prepararConsulta('SELECT numero_mesa, COUNT(*) AS cantidad_pedidos
+            FROM mesas
+            JOIN pedidos ON mesas.id = pedidos.mesa_id
+            GROUP BY numero_mesa
+            ORDER BY cantidad_pedidos DESC
+            LIMIT 1;');
+
+            $query->execute();
+
+            $resultado = $query->fetch(PDO::FETCH_ASSOC);
+
+            return $resultado;
+        }
         
  }
-?>

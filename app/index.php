@@ -21,6 +21,8 @@ require_once './controllers/EmpleadoController.php';
 require_once './controllers/PedidoController.php';
 require_once './controllers/ProductoController.php';
 require_once './controllers/LoginController.php';
+require_once './controllers/EncuestaController.php';
+require_once './controllers/ArchivosController.php';
 
 // Load ENV
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
@@ -80,8 +82,10 @@ $app->group('/pedidos', function (RouteCollectorProxy $group) {
     ->add(\MWAccesos::class . ':esMozo');
   $group->post('[/]', \PedidoController::class . ':CargarUno') 
     ->add(\MWAccesos::class . ':esMozo');
-  $group->put('/', \PedidoController::class . ':ModificarUno') 
+  $group->put('/modificar', \PedidoController::class . ':ModificarUno') 
     ->add(\MWAccesos::class . ':esEmpleado');
+  $group->get('/lista', \PedidoController::class . ':TraerPedidosTiempo') 
+    ->add(\MWAccesos::class . ':esSocio');
   
 });
 
@@ -89,13 +93,31 @@ $app->group('/pedidos', function (RouteCollectorProxy $group) {
 $app->group('/mesas', function (RouteCollectorProxy $group) {
   $group->get('[/]', \MesaController::class . ':TraerTodos') 
     ->add(\MWAccesos::class . ':esMozo');
+  $group->get('/lista', \MesaController::class . ':TraerTodos')
+      ->add(\MWAccesos::class . ':esSocio');
   $group->put('/cobrar', \MesaController::class . ':CobrarUno') 
     ->add(\MWAccesos::class . ':esMozo');
   $group->put('/modificar', \MesaController::class . ':ModificarUno') 
     ->add(\MWAccesos::class . ':esMozo');
-  $group->put('/cerrarmesa', \MesaController::class . ':ModificarUnoAdmin') 
+  $group->put('/cerrarmesa', \MesaController::class . ':CerrarMesa') 
+  ->add(\MWAccesos::class . ':esSocio');
+  $group->post('/crearmesa', \MesaController::class . ':CargarUno') 
   ->add(\MWAccesos::class . ':esSocio');
 });
 
+$app->group('/cliente', function (RouteCollectorProxy $group) {
+  $group->get('/mesa/{mesa_id}/{nro_pedido}', \MesaController::class . ':TraerDemoraPedidoMesa'); 
+  $group->post('/encuesta', \EncuestaController::class . ':RealizarEncuesta'); 
+});
+
+$app->group('/socio', function (RouteCollectorProxy $group) {
+  $group->post('/obtenerencuestas', \EncuestaController::class . ':ObtenerMejores');
+  $group->get('/obtenermesa', \MesaController::class . ':MesaMasUsada');
+})->add(\MWAccesos::class . ':esSocio');
+
+$app->group('/archivos', function (RouteCollectorProxy $group) {
+  $group->get('/guardarcsv', \ArchivosController::class . ':Guardar'); 
+  $group->get('/leercsv', \ArchivosController::class . ':Leer'); 
+})->add(\MWAccesos::class . ':esSocio');
 
 $app->run();

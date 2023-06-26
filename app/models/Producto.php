@@ -104,6 +104,7 @@ class Producto
         return $query->fetchObject("Producto");
     }
 
+    
 
     public static function getProductoPorTipoUsuario($usuario_tipo)
     {
@@ -142,7 +143,7 @@ class Producto
                     p.tiempo_fin AS tiempo_fin,
                     p.tiempo_para_finalizar AS tiempo_para_finalizar
                     FROM producto AS p
-                    WHERE p.pedido_asociado = :id;"
+                    WHERE p.pedido_asociado = :nro_pedido;"
         );
         $query->bindParam(':id', $pedidoId);
         $query->execute();
@@ -162,8 +163,8 @@ class Producto
     public static function getSumaProductosPorPedido($pedido_id)
     {
         $objDataAccess = AccesoDatos::obtenerInstancia();
-        $query = $objDataAccess->prepararConsulta("SELECT SUM(p.costo) AS total FROM producto AS p WHERE pedido_asociado = :id");
-        $query->bindParam(':id', $pedido_id);
+        $query = $objDataAccess->prepararConsulta("SELECT SUM(p.costo) AS total FROM producto AS p WHERE pedido_asociado = :nro_pedido");
+        $query->bindParam(':nro_pedido', $pedido_id);
         $query->execute();
 
         return $query->fetchObject()->total;

@@ -17,22 +17,20 @@ class ProductoController extends Producto implements IApiUsable
             date("Y-m-d H:i:s")
         );
 
-        echo 'Producto creado';
-        var_dump($producto);
+     
 
-        $payload = json_encode($producto);
         if (Producto::insertarProducto($producto) > 0) {
 
-            $pedido = Pedido::getPedidoPorId($pedido_asociado);
-            $pedido_costo = Producto::getSumaProductosPorPedido($pedido->id);
+            $pedido = Pedido::getPedidoPorNroPedido($pedido_asociado);
+            $pedido_costo = Producto::getSumaProductosPorPedido($pedido->nro_pedido);
             $pedido->pedido_costo = $pedido_costo;
 
             if (Pedido::actualizarPedido($pedido) > 0) {
                 echo 'El total del precio del pedido ha sido actualizado';
-                var_dump($pedido);
+                echo $pedido->costo;
             }
 
-            $payload = json_encode(array("mensaje" => "Producto creado con exito"));
+            $payload = json_encode(array("mensaje" => "Producto creado: " . $producto->descripcion));
             $response->getBody()->write("Producto creado con exito");
         } else {
             $response->getBody()->write("Error, algo salio mal al crear el producto");
@@ -58,8 +56,8 @@ class ProductoController extends Producto implements IApiUsable
     {
         $empleado_tipo = UsuarioController::GetInfoByToken($request)->usuario_tipo;
         $empleado_tipo_id = Area::getAreaPorPuesto($empleado_tipo);
-        switch($empleado_tipo_id){
-            case 2 :
+        switch ($empleado_tipo_id) {
+            case 2:
             case 5:
                 $auxiliar = 3;
                 break;
@@ -68,7 +66,7 @@ class ProductoController extends Producto implements IApiUsable
                 break;
             case 4:
                 $auxiliar = 1;
-                break; 
+                break;
         }
 
         $productos = Producto::getProductoPorTipoUsuario($auxiliar);
@@ -89,18 +87,28 @@ class ProductoController extends Producto implements IApiUsable
 
     public function ModificarUno($request, $response, $args)
     {
+        $jsonData = file_get_contents('php://input');
+        $data = json_decode($jsonData);
 
 
-        //$this->TraerTodos($request, $response, $args);
+        $id = $data->id;
+        $estado = $data->estado;
+        $tiempo_para_finalizar = $data->tiempo_para_finalizar;
 
-        $params = $request->getParsedBody();
-        $id_producto = $params['id'];
-        echo $id_producto;
-        $estado = $params['estado'];
-        $producto = Producto::getProductoPorId($id_producto);
-        $payload = json_encode(array("mensaje" => "Producto modificado"));
+       
+        $params = array(
+            'id' => $id,
+            'estado' => $estado,
+            'tiempo_para_finalizar' => $tiempo_para_finalizar
+        );
 
+        $producto = Producto::getProductoPorId($id);
+        $producto->estado = $estado;
+        $producto->tiempo_para_finalizar = $tiempo_para_finalizar;
+        $producto->calcularTiempoFinalizacion();
 
+        Producto::actualizarProducto($producto);
+        $payload = json_encode(array("mensaje" => $producto));
         $response->getBody()->write($payload);
         return $response
             ->withHeader('Content-Type', 'application/json');
