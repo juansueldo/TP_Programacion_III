@@ -60,6 +60,7 @@ class HistorialLogin{
                     $line = $entity->usuario_id . "," . $entity->usuario_nombre . "," . $entity->fecha_login . PHP_EOL;
                     fwrite($file, $line);
                     $success = true;
+                    
                 }
             }
         } catch (\Throwable $th) {

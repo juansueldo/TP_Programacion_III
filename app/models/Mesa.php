@@ -42,7 +42,14 @@
 
             return $query->fetchObject('Mesa');
         }
+        public static function getMesaPorNro($numero_mesa){
+            $objDataAccess = AccesoDatos::obtenerInstancia();
+            $query = $objDataAccess->prepararConsulta('SELECT * FROM mesas WHERE numero_mesa = :numero_mesa');
+            $query->bindParam(':numero_mesa', $numero_mesa);
+            $query->execute();
 
+            return $query->fetchObject('Mesa');
+        }
         public static function insertarMesa($mesa){
             $objDataAccess = AccesoDatos::obtenerInstancia();
             $query = $objDataAccess->prepararConsulta('INSERT INTO mesas (numero_mesa, empleado_id, estado) 

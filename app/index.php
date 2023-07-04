@@ -111,7 +111,7 @@ $app->group('/cliente', function (RouteCollectorProxy $group) {
 });
 
 $app->group('/socio', function (RouteCollectorProxy $group) {
-  $group->post('/obtenerencuestas', \EncuestaController::class . ':ObtenerMejores');
+  $group->get('/obtenerencuestas/{limite}', \EncuestaController::class . ':ObtenerMejores');
   $group->get('/obtenermesa', \MesaController::class . ':MesaMasUsada');
 })->add(\MWAccesos::class . ':esSocio');
 

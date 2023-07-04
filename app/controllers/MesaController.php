@@ -56,7 +56,7 @@ class MesaController extends Mesa implements IApiUsable
     $data = json_decode($jsonData);
     $mesa = Mesa::getMesaPorId($data->id);
 
-    if(Mesa::getProductosListosParaServir($data->id, "Listo Para Servir") === Mesa::getProductosMesa($data->id)){
+    if(Mesa::getProductosListosParaServir($data->id, "listo para servir") === Mesa::getProductosMesa($data->id)){
       $mesa->estado = "con cliente comiendo";
       Mesa::actualizarMesa($mesa);
       $payload = json_encode(array("mensaje"=> $mesa));
@@ -76,11 +76,15 @@ class MesaController extends Mesa implements IApiUsable
     $payload = json_encode(array("mensaje" => "Error al cobrar en la mesa"));
 
       $mesa = Mesa::getMesaPorId($data->id);
-
       $mesa->estado = "con cliente pagando";
       Mesa::actualizarMesa($mesa);
+      
       if($mesa !== null){
         $payload = json_encode(array("mensaje" =>  "Mesa cobrada con exito"));
+        $pedido = Pedido::getPedidoPorMesa($data->id);
+        var_dump($pedido);
+        $pedido->estado = "finalizado";
+        Pedido::actualizarPedido($pedido);
       }
       
 

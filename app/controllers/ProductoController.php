@@ -8,8 +8,23 @@ class ProductoController extends Producto implements IApiUsable
     {
         $params = $request->getParsedBody();;
         $pedido_asociado = $params['pedido_asociado'];
+        $area = $params['area'];
+        switch($area){
+            case "cocina":
+                $area_id = 3;
+                break;
+            case "barra de tragos":
+                $area_id = 1;
+                break;
+            case "barra de choperas":
+                $area_id = 2;
+                break;
+            case "candy bar":
+                $area_id = 4;
+                break;
+        }
         $producto = Producto::crearProducto(
-            $params['area_id'],
+            $area_id,
             $params['pedido_asociado'],
             $params['estado'],
             $params['descripcion'],
@@ -22,19 +37,32 @@ class ProductoController extends Producto implements IApiUsable
         if (Producto::insertarProducto($producto) > 0) {
 
             $pedido = Pedido::getPedidoPorNroPedido($pedido_asociado);
-            $pedido_costo = Producto::getSumaProductosPorPedido($pedido->nro_pedido);
-            $pedido->pedido_costo = $pedido_costo;
-
-            if (Pedido::actualizarPedido($pedido) > 0) {
-                echo 'El total del precio del pedido ha sido actualizado';
-                echo $pedido->costo;
+            if($pedido != null){
+                $pedido_costo = Producto::getSumaProductosPorPedido($pedido->nro_pedido);
+                $pedido->pedido_costo = $pedido_costo;
+    
+                if (Pedido::actualizarPedido($pedido) > 0) {
+                    echo 'El total del precio del pedido ha sido actualizado';
+                    echo $pedido->costo;
+                }
             }
-
+            else{
+                if(Pedido::insertarNroPedido($pedido_asociado)>0){
+                    $pedido = Pedido::getPedidoPorNroPedido($pedido_asociado);
+            if($pedido != null){
+                $pedido_costo = Producto::getSumaProductosPorPedido($pedido->nro_pedido);
+                $pedido->pedido_costo = $pedido_costo;
+    
+                if (Pedido::actualizarPedido($pedido) > 0) {
+                    echo 'El total del precio del pedido ha sido actualizado';
+                    echo $pedido->costo;
+                }
+                }
+            }
+        }
             $payload = json_encode(array("mensaje" => "Producto creado: " . $producto->descripcion));
             $response->getBody()->write("Producto creado con exito");
-        } else {
-            $response->getBody()->write("Error, algo salio mal al crear el producto");
-        }
+        } 
         $response->getBody()->write($payload);
         return $response
             ->withHeader('Content-Type', 'application/json');

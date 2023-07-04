@@ -27,10 +27,12 @@ class EncuestaController{
           ->withHeader('Content-Type', 'application/json');
     }
     public function ObtenerMejores($request, $response, $args){
-        $params = $request->getParsedBody();
+        $limite = $args['limite'];
+        echo $limite;
+        //$params = $request->getParsedBody();
         $payload = json_encode(array("message" => 'Error al cargar las encuestas'));
-        if (isset($params['limite'])){
-            $limite = $params['limite'];
+        if (isset($limite)){
+            //$limite = $params['limite'];
             $encuestas = Encuesta::getMejorPromedio($limite);
             $payload = json_encode(array("Encuestas" => $encuestas));
         }

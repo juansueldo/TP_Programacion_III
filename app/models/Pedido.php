@@ -42,7 +42,20 @@ class Pedido{
 
         return $objDataAccess->obtenerUltimoId();
     }
+    public static function insertarNroPedido($nro_pedido){
+        $objDataAccess = AccesoDatos::obtenerInstancia();
+        $query = $objDataAccess->prepararConsulta('INSERT INTO pedidos (mesa_id, nro_pedido, pedido_estado, cliente_nombre, pedido_foto, pedido_costo) 
+        VALUES (:mesa_id, :nro_pedido, :pedido_estado, :cliente_nombre,:pedido_foto, :pedido_costo)');
+        $query->bindValue(':mesa_id', null);
+        $query->bindValue(':nro_pedido', $nro_pedido);
+        $query->bindValue(':pedido_estado', null);
+        $query->bindValue(':cliente_nombre', null);
+        $query->bindValue(':pedido_foto', null);
+        $query->bindValue(':pedido_costo', null);
+        $query->execute();
 
+        return $objDataAccess->obtenerUltimoId();
+    }
 
     public static function getTodos(){
         $objDataAccess = AccesoDatos::obtenerInstancia();
@@ -72,8 +85,9 @@ class Pedido{
     
     public static function getPedidoPorMesa($mesa){
         $objDataAccess = AccesoDatos::obtenerInstancia();
-        $query = $objDataAccess->prepararConsulta('SELECT * FROM pedidos WHERE mesa_id = :mesa_id');
+        $query = $objDataAccess->prepararConsulta('SELECT * FROM pedidos WHERE mesa_id = :mesa_id AND pedido_estado != :pedido_estado');
         $query->bindParam(':mesa_id', $mesa);
+        $query->bindParam(':pedido_estado', 'finalizado');
         $query->execute();
 
         return $query->fetchAll(PDO::FETCH_ASSOC, 'Pedido');
@@ -118,7 +132,20 @@ class Pedido{
 
         return $query;
     }
+    public static function actualizarPedidoDatos($pedido){
+        $objDataAccess = AccesoDatos::obtenerInstancia();
+        $query = $objDataAccess->prepararConsulta('UPDATE pedidos 
+        SET mesa_id = :mesa_id, pedido_estado = :pedido_estado, cliente_nombre = :cliente_nombre, pedido_foto = :pedido_foto 
+        WHERE id = :id');
+        $query->bindValue(':id', $pedido->id);
+        $query->bindValue(':mesa_id', $pedido->mesa_id);
+        $query->bindValue(':pedido_estado', $pedido->pedido_estado);
+        $query->bindValue(':cliente_nombre', $pedido->cliente_nombre);
+        $query->bindValue(':pedido_foto', $pedido->pedido_foto);
+        $query->execute();
 
+        return $query;
+    }
 
     public static function borrarPedidoPorId($id){
         $objDataAccess = AccesoDatos::obtenerInstancia();

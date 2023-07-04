@@ -77,16 +77,30 @@ class PedidoController extends Pedido implements IApiUsable{
                 echo "Error al guardar el archivo.";
             }
         }
+        $auxiliar = Pedido::getPedidoPorNroPedido($params['nro_pedido']);
+        if($auxiliar == null){
+            $pedido = Pedido::crearPedido(
+                $mesa_id, 
+                $params['nro_pedido'],
+                $params['pedido_estado'], 
+                $nombre_cliente,
+                $rutaArchivoDestino
+            );
+            Pedido::insertarPedido($pedido);
+            $payload = json_encode(array("mensaje" => $pedido));
+        }
+        else{
+            $auxiliar->mesa_id = $mesa_id;
+            $auxiliar->pedido_estado = $params['pedido_estado'];
+            $auxiliar->cliente_nombre = $nombre_cliente;
+            $auxiliar->pedido_foto = $rutaArchivoDestino;
 
-        $pedido = Pedido::crearPedido(
-            $mesa_id, 
-            $params['nro_pedido'],
-            $params['pedido_estado'], 
-            $nombre_cliente,
-            $rutaArchivoDestino
-        );
-        Pedido::insertarPedido($pedido);
-        $payload = json_encode(array("mensaje" => $pedido));
+            Pedido::actualizarPedidoDatos($auxiliar);
+            $payload = json_encode(array("mensaje" => $auxiliar));
+        }
+        $mesa_actual = Mesa::getMesaPorId($mesa_id);
+        $mesa_actual->estado = $params['pedido_estado'];
+        Mesa::actualizarMesa($mesa_actual);
         $response->getBody()->write("Pedido creado con exito");
         
         $response->getBody()->write($payload);
