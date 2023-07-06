@@ -83,14 +83,14 @@ class Pedido{
         return $query->fetchObject('Pedido');
     }
     
-    public static function getPedidoPorMesa($mesa){
+    public static function getPedidoPorMesa($mesa, $estado){
         $objDataAccess = AccesoDatos::obtenerInstancia();
         $query = $objDataAccess->prepararConsulta('SELECT * FROM pedidos WHERE mesa_id = :mesa_id AND pedido_estado != :pedido_estado');
-        $query->bindParam(':mesa_id', $mesa);
-        $query->bindParam(':pedido_estado', 'finalizado');
+        $query->bindParam(':mesa_id', $mesa, PDO::PARAM_INT);
+        $query->bindParam(':pedido_estado', $estado, PDO::PARAM_STR);
         $query->execute();
 
-        return $query->fetchAll(PDO::FETCH_ASSOC, 'Pedido');
+        return $query->fetchObject('Pedido');
     }
 
     public static function getPedidoPorEmpleado($empleado){
@@ -201,6 +201,15 @@ class Pedido{
         $query->execute();
 
         return $query->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function getTodosPedidosTarde()
+    {
+        $objDataAccess = AccesoDatos::obtenerInstancia();
+        $query = $objDataAccess->prepararConsulta("SELECT pedidos.*, CASE WHEN TIMESTAMPDIFF(MINUTE, producto.tiempo_inicio, producto.tiempo_fin) > producto.tiempo_para_finalizar THEN TIMESTAMPDIFF(MINUTE, producto.tiempo_inicio, producto.tiempo_fin) - producto.tiempo_para_finalizar ELSE 0 END AS tiempo_para_finalizar FROM pedidos INNER JOIN producto ON pedidos.nro_pedido = producto.pedido_asociado AND TIMESTAMPDIFF(MINUTE, producto.tiempo_inicio, producto.tiempo_fin) > producto.tiempo_para_finalizar");
+        $query->execute();
+
+        return $query->fetchAll(PDO::FETCH_CLASS, "Pedido");
     }
 }
 ?>

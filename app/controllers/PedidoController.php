@@ -152,5 +152,17 @@ class PedidoController extends Pedido implements IApiUsable{
         return $response
             ->withHeader('Content-Type', 'application/json');
     }
+    public function TraerTodosTarde($request, $response, $args)
+    {
+        
+
+        $pedidos = Pedido::getTodosPedidosTarde();
+        
+
+        $payload = json_encode(array("Pedidos tarde" => $pedidos));
+        $response->getBody()->write($payload);
+        return $response
+            ->withHeader('Content-Type', 'application/json');
+    }
 }
 ?>

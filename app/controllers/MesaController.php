@@ -78,12 +78,12 @@ class MesaController extends Mesa implements IApiUsable
       $mesa = Mesa::getMesaPorId($data->id);
       $mesa->estado = "con cliente pagando";
       Mesa::actualizarMesa($mesa);
+      $aux = $data->id;
       
       if($mesa !== null){
         $payload = json_encode(array("mensaje" =>  "Mesa cobrada con exito"));
-        $pedido = Pedido::getPedidoPorMesa($data->id);
-        var_dump($pedido);
-        $pedido->estado = "finalizado";
+        $pedido = Pedido::getPedidoPorMesa($aux, 'finalizado');
+        $pedido->pedido_estado = "finalizado";
         Pedido::actualizarPedido($pedido);
       }
       
@@ -103,8 +103,10 @@ class MesaController extends Mesa implements IApiUsable
     $mesa = Mesa::getMesaPorId($data->id);
     $mesa->estado = "cerrada";
     Mesa::actualizarMesa($mesa);
+    
       if($mesa !== null){
         $payload = json_encode(array("mensaje" =>  "Mesa cerrada"));
+        echo "Nro de mesa: " . $mesa->numero_mesa . " Cerrada";
       }
       
     $response->getBody()->write($payload);

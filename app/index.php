@@ -74,6 +74,8 @@ $app->group('/productos', function (RouteCollectorProxy $group) {
     ->add(\MWAccesos::class . ':esMozo');
   $group->put('/modificar', \ProductoController::class . ':ModificarUno') 
     ->add(\MWAccesos::class . ':esEmpleado');
+    $group->put('/modificardos', \ProductoController::class . ':ModificarUnoDos') 
+    ->add(\MWAccesos::class . ':esEmpleado');
 });
 
 //* PEDIDOS 
@@ -117,7 +119,10 @@ $app->group('/socio', function (RouteCollectorProxy $group) {
 
 $app->group('/archivos', function (RouteCollectorProxy $group) {
   $group->get('/guardarcsv', \ArchivosController::class . ':Guardar'); 
-  $group->get('/leercsv', \ArchivosController::class . ':Leer'); 
+  $group->get('/leercsv', \ArchivosController::class . ':Leer');
+  $group->post('/guardarpdf', \ArchivosController::class . ':DownloadPdf');
+  $group->get('/productostarde', \ProductoController::class . ':TraerTodosTarde');
+  $group->get('/pedidostarde', \PedidoController::class . ':TraerTodosTarde');   
 })->add(\MWAccesos::class . ':esSocio');
 
 $app->run();

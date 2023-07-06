@@ -94,6 +94,22 @@ class Producto
         return $query->fetchAll(PDO::FETCH_CLASS, "Producto");
     }
 
+    public static function getTodosProductosTarde()
+    {
+        $objDataAccess = AccesoDatos::obtenerInstancia();
+        $query = $objDataAccess->prepararConsulta("SELECT *,
+        CASE
+            WHEN TIMESTAMPDIFF(MINUTE, tiempo_inicio, tiempo_fin) > tiempo_para_finalizar THEN TIMESTAMPDIFF(MINUTE, tiempo_inicio, tiempo_fin) - tiempo_para_finalizar
+            ELSE 0
+        END AS tiempo_para_finalizar
+        FROM producto
+        WHERE TIMESTAMPDIFF(MINUTE, tiempo_inicio, tiempo_fin) > tiempo_para_finalizar");
+        $query->execute();
+
+        return $query->fetchAll(PDO::FETCH_CLASS, "Producto");
+    }
+
+
     public static function getProductoPorId($id)
     {
         $objDataAccess = AccesoDatos::obtenerInstancia();

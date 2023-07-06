@@ -142,6 +142,32 @@ class ProductoController extends Producto implements IApiUsable
             ->withHeader('Content-Type', 'application/json');
     }
 
+    public function ModificarUnoDos($request, $response, $args)
+    {
+        $jsonData = file_get_contents('php://input');
+        $data = json_decode($jsonData);
+
+        $id = $data->id;
+        $estado = $data->estado;
+       
+
+        $producto = Producto::getProductoPorId($id);
+        $producto->estado = $estado;
+        $fechaActual = new DateTime(); // Crea un objeto DateTime con la fecha y hora actual
+        $minutosASumar = 10; // Cantidad de minutos a sumar
+
+        $fechaActual->add(new DateInterval('PT' . $minutosASumar . 'M')); // Agrega el intervalo de minutos
+
+        echo $fechaActual->format('Y-m-d H:i:s');
+        $producto->tiempo_fin = $fechaActual->format('Y-m-d H:i:s');
+ 
+
+        Producto::actualizarProducto($producto);
+        $payload = json_encode(array("mensaje" => $producto));
+        $response->getBody()->write($payload);
+        return $response
+            ->withHeader('Content-Type', 'application/json');
+    }
     public function BorrarUno($request, $response, $args)
     {
         $params = $request->getParsedBody();
@@ -154,6 +180,18 @@ class ProductoController extends Producto implements IApiUsable
         } else {
             $response->getBody()->write("Error mientras se eliminaba el producto");
         }
+        $response->getBody()->write($payload);
+        return $response
+            ->withHeader('Content-Type', 'application/json');
+    }
+    public function TraerTodosTarde($request, $response, $args)
+    {
+        
+
+        $productos = Producto::getTodosProductosTarde();
+        
+
+        $payload = json_encode(array("Productos tarde" => $productos));
         $response->getBody()->write($payload);
         return $response
             ->withHeader('Content-Type', 'application/json');
